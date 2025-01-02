@@ -15,7 +15,7 @@ import torch
 
 
 # LangChain imports
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain_community.document_loaders import TextLoader
