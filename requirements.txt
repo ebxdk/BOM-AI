@@ -14,3 +14,4 @@ soundfile==0.12.1
 faiss-cpu==1.7.4
 chromadb==0.3.26
 gunicorn==20.1.0
+Werkzeug==2.2.3
