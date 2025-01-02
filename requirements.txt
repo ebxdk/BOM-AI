@@ -16,6 +16,5 @@ chromadb==0.3.26
 gunicorn==20.1.0
 Werkzeug==2.2.3
 
-# Add these lines for langchain_huggingface and langchain_community
 git+https://github.com/hwchase17/langchain.git#egg=langchain_huggingface
 git+https://github.com/langchain-ai/langchain-extensions.git#egg=langchain_community
