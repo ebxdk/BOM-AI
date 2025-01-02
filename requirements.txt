@@ -13,3 +13,4 @@ matplotlib==3.7.2
 soundfile==0.12.1
 faiss-cpu==1.7.4
 chromadb==0.3.26
+gunicorn==20.1.0
