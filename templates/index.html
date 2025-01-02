@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capacity Creator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Capacity Creator</h1>
+        {% if session.username %}
+        <p>Logged in as {{ session.username }} | <a href="{{ url_for('logout') }}">Logout</a></p>
+        {% endif %}
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="left-side">
+                {% if session.error_message %}
+                <div class="error">
+                    <p>{{ session.error_message }}</p>
+                </div>
+                {% endif %}
+
+                {% if session.result %}
+                <section>
+                    <h2>Results for {{ session.result.username }}</h2>
+                    <p><strong>Energy Score:</strong> {{ session.result.energy_score }}</p>
+                    <p><strong>Purpose Score:</strong> {{ session.result.purpose_score }}</p>
+                    <p><strong>Connection Score:</strong> {{ session.result.connection_score }}</p>
+                    <p><strong>User State:</strong> {{ session.result.user_state }}</p>
+                    <p><strong>Recommendations:</strong></p>
+                    <ul>
+                        {% for rec in session.result.recommendations %}
+                            <li>
+                                {{ rec.tool }} (Sequence: {{ rec.sequence }}, Duration: {{ rec.duration }} days)
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>User Rank:</strong>
+                        {% if session.result.rank is not none %}
+                            {{ session.result.rank }}
+                        {% else %}
+                            No rank available
+                        {% endif %}
+                    </p>
+                    <pre id="recommendation-message" class="typewriter-text">{{ session.result.recommendation_message }}</pre>
+
+                    <!-- Add Retake Assessment Button -->
+                    <form action="{{ url_for('retake_assessment') }}" method="post">
+                        <button type="submit">Retake Assessment</button>
+                    </form>
+                    
+                </section>
+                {% else %}
+                <section>
+                    <h2>Capacity Assessment</h2>
+                    <form action="{{ url_for('index') }}" method="POST">
+                        {% for idx, q in questions %}
+                        <div class="question">
+                            <p><strong>Question {{ idx }}:</strong> {{ q.question }}</p>
+                            {% for option in q.options %}
+                            <label>
+                                <input type="radio" name="question_{{ idx }}" value="{{ option }}" required>
+                                {{ option }}
+                            </label><br>
+                            {% endfor %}
+                        </div>
+                        <hr>
+                        {% endfor %}
+                        <button type="submit">Submit Assessment</button>
+                    </form>
+                </section>
+                {% endif %}
+            </div>
+
+            <div class="right-side">
+                {% if session.result %}
+                <section>
+                    <h2>Chat with AI</h2>
+                    <form id="chat-form">
+                        <label for="chat-message">Message:</label>
+                        <input type="text" id="chat-message" name="message" placeholder="Ask a question..." required>
+                        <button type="submit">Send</button>
+                    </form>
+                    <button id="start-voice-chat">🎙️ Start Voice Chat</button>
+                    <button id="play-response-voice">🔊 Play Response Voice</button>
+                    <button id="stop-chat-response">🛑 Stop Response</button>
+                    <pre id="chat-response" class="typewriter-text"></pre>
+                </section>
+
+                <!-- Notification Section -->
+                <div id="notification-section" class="notification-section">
+                    <h2>Notifications</h2>
+                    <ul id="notifications-list"></ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Capacity Creator</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let lastResponseText = ''; // Store the last chatbot response
+            let responseInProgress = false; // Track if a response is in progress
+            let typingTimeout; // To handle typewriter effect and stopping it
+            let speechSynthesisInstance; // Store speech synthesis instance
+
+            // Function to send a message to the server
+            function sendMessage(message) {
+                if (responseInProgress) return; // Prevent sending if response is in progress
+
+                responseInProgress = true;
+                disableInputs(true); // Disable chat input and submit button
+
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 'message': message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const chatResponseElement = document.getElementById('chat-response');
+                    lastResponseText = data.response.replace(/["]+/g, '');  // Store response text for playback
+
+                    // Clear previous typing animation
+                    clearTimeout(typingTimeout);
+
+                    // Start typewriter effect for the response
+                    typeWriter(chatResponseElement, lastResponseText, 10, () => {
+                        responseInProgress = false; // Mark response as complete
+                        disableInputs(false); // Re-enable inputs
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    responseInProgress = false; // Reset the response flag
+                    disableInputs(false); // Re-enable inputs in case of error
+                });
+            }
+
+            // Typewriter effect function
+            function typeWriter(element, text, speed = 10, callback) {
+                element.innerText = ''; // Clear any existing content
+                let i = 0;
+
+                function type() {
+                    if (i < text.length) {
+                        element.innerText += text.charAt(i);
+                        i++;
+                        typingTimeout = setTimeout(type, speed);
+                    } else if (callback) {
+                        callback(); // Call the callback function once typing is complete
+                    }
+                }
+
+                type();
+            }
+
+            // Function to disable/enable inputs
+            function disableInputs(disable) {
+                document.getElementById('chat-message').disabled = disable;
+                document.getElementById('chat-form').querySelector('button[type="submit"]').disabled = disable;
+            }
+
+            // Function to stop the response and clear the typewriter effect and voice
+            function stopResponse() {
+                clearTimeout(typingTimeout); // Stop the typewriter effect
+                const chatResponseElement = document.getElementById('chat-response');
+                chatResponseElement.innerText = ''; // Clear the response text
+                responseInProgress = false; // Mark response as stopped
+                disableInputs(false); // Re-enable inputs
+                
+                if (speechSynthesisInstance) {
+                    window.speechSynthesis.cancel(); // Stop the current voice response
+                }
+            }
+
+            // Handle form submission for chat
+            const chatForm = document.getElementById('chat-form');
+            chatForm.addEventListener('submit', function(event) {
+                event.preventDefault();  // Prevent the form from submitting normally
+                const message = document.getElementById('chat-message').value;
+                document.getElementById('chat-message').value = ''; // Clear the input field
+                sendMessage(message); // Send the message to the server
+            });
+
+            // Handle Stop button click event
+            const stopButton = document.getElementById('stop-chat-response');
+            if (stopButton) {
+                stopButton.addEventListener('click', stopResponse);
+            }
+
+            // Voice chat and play response voice functionality
+            const startVoiceChatButton = document.getElementById('start-voice-chat');
+            if (startVoiceChatButton) {
+                startVoiceChatButton.addEventListener('click', function() {
+                    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                    recognition.lang = 'en-US';
+                    recognition.start();
+
+                    recognition.onresult = function(event) {
+                        const voiceMessage = event.results[0][0].transcript;
+                        document.getElementById('chat-message').value = voiceMessage;
+                        sendMessage(voiceMessage);  // Automatically send the voice message
+                    };
+                });
+            }
+
+            // Play response voice functionality
+            const playResponseVoiceButton = document.getElementById('play-response-voice');
+            if (playResponseVoiceButton) {
+                playResponseVoiceButton.addEventListener('click', function() {
+                    if (lastResponseText) {
+                        speechSynthesisInstance = new SpeechSynthesisUtterance(lastResponseText);
+                        window.speechSynthesis.speak(speechSynthesisInstance);
+                    } else {
+                        console.warn("No response text to play.");
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

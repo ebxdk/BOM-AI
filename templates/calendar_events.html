@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar Events</title>
+</head>
+<body>
+    <h1>Upcoming Events</h1>
+    <ul>
+        {% for event in events %}
+            <li>{{ event.start }}: {{ event.summary }}</li>
+        {% else %}
+            <li>No upcoming events found.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

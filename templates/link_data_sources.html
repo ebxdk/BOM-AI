@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Data Sources</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <header>
+        <h1>Link Your Data Sources</h1>
+    </header>
+
+    <section>
+        <h2>Connect Your Accounts</h2>
+        <p>To get the most out of Capacity Creator, link your calendar and task accounts. We use this information to provide personalized recommendations.</p>
+
+        <div>
+            <h3>Google Account</h3>
+            <a href="{{ url_for('authorize') }}">Link Google Account</a>
+            {% if session['credentials'] %}
+            <p>Google Account Linked: Yes</p>
+            {% else %}
+            <p>Google Account Linked: No</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <h3>Outlook Account</h3>
+            <a href="{{ url_for('authorize_outlook') }}">Link Outlook Account</a>
+            {% if session['outlook_credentials'] %}
+            <p>Outlook Account Linked: Yes</p>
+            {% else %}
+            <p>Outlook Account Linked: No</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <h3>Continue with Data Processing</h3>
+            <p>Once you have linked your accounts, you can proceed with processing your calendar and task data for personalized recommendations.</p>
+            <a href="{{ url_for('submit_data') }}">Submit Calendar and Task Data</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Capacity Creator</p>
+    </footer>
+
+</body>
+</html>

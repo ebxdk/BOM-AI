@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burnout Prevention Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .typewriter-cursor {
+            display: inline-block;
+            width: 1px;
+            background-color: black;
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            50.01%, 100% { opacity: 0; }
+        }
+        .no-cursor .typewriter-cursor {
+            display: none;
+        }
+        .typewriter-text {
+            white-space: pre-wrap; /* Preserve whitespace and wrap as necessary */
+            word-wrap: break-word; /* Ensure long words break to fit the container */
+            overflow-wrap: break-word; /* Handle very long words properly */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Burnout Prevention Chatbot</h1>
+        <form id="chat-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+
+            <button type="submit">Send</button>
+        </form>
+        
+        <div id="chat-response-container">
+            <h2>Chatbot Response</h2>
+            <pre id="chat-response" class="typewriter-text"></pre>
+        </div>
+
+        <a href="/">Go Back</a>
+    </div>
+
+    <script>
+        function typeWriter(text, element, interval, callback) {
+            let i = 0;
+            const cursor = document.createElement('span');
+            cursor.className = 'typewriter-cursor';
+            element.appendChild(cursor);
+
+            function type() {
+                if (i < text.length) {
+                    let char = text[i];
+                    if (char === '*' && text[i + 1] === '*') {
+                        element.innerHTML = element.innerHTML.slice(0, -1);
+                        i += 2;
+                        let end = text.indexOf('**', i);
+                        if (end !== -1) {
+                            element.innerHTML += '<strong>' + text.slice(i, end) + '</strong>';
+                            i = end + 2;
+                        }
+                    } else {
+                        element.innerHTML += char;
+                        i++;
+                    }
+                    element.innerHTML += cursor.outerHTML;
+                    setTimeout(type, interval);
+                } else {
+                    element.classList.add('no-cursor');
+                    if (callback) callback();
+                }
+            }
+
+            type();
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const message = document.getElementById('message').value;
+            const username = document.getElementById('username').value;
+
+            const responseContainer = document.getElementById('chat-response');
+            responseContainer.innerHTML = ''; // Clear previous response
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message, username }),
+            });
+
+            const data = await response.json();
+            typeWriter(data.response, responseContainer, 0); // Adjust the speed as needed
+        });
+    </script>
+</body>
+</html>

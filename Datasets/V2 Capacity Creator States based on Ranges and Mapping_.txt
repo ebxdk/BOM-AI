@@ -1,0 +1,124 @@
+Here's the scoring criteria and definitions for each category based on the mapped combinations:
+1. Depleted
+? Criteria: All scores are "Low" (L).
+? Definition: In a Depleted state, an individual has low Energy, Purpose, and Connection, indicating a high risk of burnout. This state suggests that the individual lacks the necessary resources and drive to sustain their current workload or commitments, often feeling overwhelmed and drained.
+2. Indulgent
+? Criteria: Low in Purpose only, with variations in Energy and Connection.
+? Definition: The Indulgent state reflects a lack of purpose, although there may be some Energy and Connection. An individual in this state may engage in activities that feel enjoyable or easy but lack meaningful goals or a sense of direction. This can lead to temporary satisfaction but may not sustain long-term fulfillment or motivation.
+3. Fatigued
+? Criteria: Low in Energy only, with variations in Purpose and Connection.
+? Definition: The Fatigued state highlights a depletion of physical or mental energy, even though Purpose and Connection remain intact. Individuals here often feel tired and may struggle to maintain productivity, despite still feeling connected to their work and goals. This state can lead to burnout if energy is not restored.
+4. Reserved
+? Criteria: Low in Connection only, with variations in Energy and Purpose.
+? Definition: In the Reserved state, individuals may still have the drive (Purpose) and capability (Energy) but lack social or emotional connection. This state may indicate isolation or a tendency to withdraw, affecting team dynamics and personal satisfaction. Building connections can enhance resilience and provide needed support.
+5. Sustained
+? Criteria: Medium to High in all areas.
+? Definition: A Sustained state represents balance, with an adequate level of Energy, Purpose, and Connection. This state is optimal for maintaining productivity and well-being. Individuals here are typically resilient, engaged, and capable of handling regular work demands effectively.
+6. Maximized
+? Criteria: High in all areas.
+? Definition: Maximized is the peak state, where Energy, Purpose, and Connection are at their highest. Individuals in this state are highly motivated, energized, and deeply connected to their work and goals. This is a state of peak performance and fulfillment, though it may not be sustainable long-term without proper balance.
+These criteria guide users to assess which state best describes their current capacity, helping them make informed decisions about workload and commitments.
+
+
+CategoryEnergyPurposeConnectionDepletedLLL    IndulgentLLMIndulgentMLLIndulgentHLLIndulgentHLMIndulgentMLMIndulgentLLHIndulgentMLH    FatiguedLMLFatiguedLMMFatiguedLMHFatiguedLHMFatiguedLHH    ReservedMMLReservedHMLReservedHHLReservedMHLReservedLHL    SustainedMMMSustainedMHMSustainedHHMSustainedHMMSustainedMHH    MaximizedHHH
+
+
+0123456
+NeverA few times a year or lessOnce a month or lessA few times a monthOnce a weekA few times a weekEveryday
+Scoring Ranges for Each Component (Energy, Purpose, Connection)
+Each question is scored between 0 and 6, so the scores for each component range from 0 (all questions marked as 0) to 36 (all questions marked as 6). Here's how to interpret the scores:
+Score RangeLevelInterpretation0 - 18LowScores in this range indicate limited capacity, suggesting minimal engagement, motivation, or connection in this component.19 - 30MediumScores in this range reflect a balanced or moderately engaged level in this component, with some consistency.31 - 36HighScores in this range represent high capacity, with strong engagement, motivation, or connection in this component.Capacity States Based on Component Score Levels
+With these ranges, we can map each capacity state based on the specific score ranges for Energy, Purpose, and Connection:
+1. Depleted: Low in all components (scores of 0-18 in Energy, Purpose, and Connection).
+? Description: The individual's scores indicate they feel depleted across all areas, with minimal energy, purpose, or connection, posing a high risk of burnout.
+2. Indulgent: Low in Purpose only (0-18), while Energy and Connection are Medium or High (19-36).
+? Description: The individual maintains energy and connection but lacks direction or meaningful goals, potentially leading to short-term satisfaction without long-term fulfillment.
+3. Fatigued: Low in Energy only (0-18), while Purpose and Connection are Medium or High (19-36).
+? Description: The individual feels motivated and connected but experiences low energy, which could lead to burnout without adequate rest or recovery.
+4. Reserved: Low in Connection only (0-18), while Energy and Purpose are Medium or High (19-36).
+? Description: The individual is driven and has stamina but feels isolated, lacking the social or emotional connections that enhance resilience and satisfaction.
+5. Sustained: Medium in all components (scores of 19-30 across Energy, Purpose, and Connection).
+? Description: The individual achieves a balanced capacity, with moderate engagement across all areas, allowing for sustained productivity and well-being.
+6. Maximized: High in all components (31-36 in Energy, Purpose, and Connection).
+? Description: The individual consistently reaches peak levels of energy, purpose, and connection, achieving optimal performance and fulfillment, though this state may require conscious balance to sustain.
+
+
+
+
+Here is a mapped framework of resources and tools, aligned to each of the six capacity states (Depleted, Indulgent, Fatigued, Reserved, Sustained, and Maximized) and ordered chronologically to help individuals progress and optimize their capacity.
+1. Depleted State (Low in all areas)
+? Goal: Rebuild foundational capacity by identifying energy drains, reconnecting with purpose, and establishing basic engagement.
+Tools & Resources:
+1. Functioning Burnout Checklist - Assess the extent and signs of burnout and identify immediate areas for rest and recovery.
+2. CHIEFF (Career, Health, Intellectual, Emotional, Financial, Fun) - Gain a holistic view of life aspects that are affected, using a red, yellow, green system to evaluate quality in each category.
+3. Load Management Evaluation - Review and prioritize tasks to reduce overload, immediately reducing capacity drains.
+4. Individual Scripts - Introduce scripts for boundary-setting and initial recovery to avoid additional depletion.
+? Progression: Focus on stabilizing well-being, setting boundaries, and reducing overcommitment.
+2. Indulgent State (Low in Purpose; Medium or High in Energy and Connection)
+? Goal: Cultivate a deeper sense of purpose and align actions with meaningful goals.
+Tools & Resources:
+1. Personal Value Proposition - Define purpose and values, identifying motivations, ideal impact, and how one's skills contribute meaningfully.
+2. Value Mining Exercise - Explore core values that feel lacking and determine areas where purpose can be strengthened. This helps align actions with intrinsic motivations.
+3. Coaching Scripts - Work through limiting beliefs or doubts around purpose and direction, reinforcing clarity on goals.
+4. Resignation Exercise - Identify any existing commitments that don't align with personal purpose and goals, allowing the individual to let go and refocus.
+? Progression: Encourage intentional goal-setting and alignment with values to move toward a balanced state.
+3. Fatigued State (Low in Energy; Medium or High in Purpose and Connection)
+? Goal: Replenish physical and mental energy to sustain purposeful and connected engagement.
+Tools & Resources:
+1. Load Management Evaluation - Reassess current workload, identify areas of overcommitment, and reduce energy-draining activities.
+2. Capacity Net Worth - Inventory energy investments in various areas and determine which commitments add or drain capacity. Redirect energy toward meaningful areas.
+3. 3x3 Capacity Matrix - Identify three core roles, goals, and control statements that clarify priorities, allowing for focused energy distribution.
+4. Egocake - Work through layers of options, distractions, and commitments, helping to remove or adjust obligations that consume energy unnecessarily.
+? Progression: Conserve energy, prioritize recovery, and streamline commitments to restore sustainable engagement.
+4. Reserved State (Low in Connection; Medium or High in Energy and Purpose)
+? Goal: Enhance social and emotional connection to increase resilience and balance in life.
+Tools & Resources:
+1. CHIEFF - Evaluate connection in all categories (Career, Health, Intellectual, Emotional, Financial, Fun), identifying areas for improvement in social and relational fulfillment.
+2. Coaching Scripts - Address possible barriers to connection (such as isolation or self-sabotage) and encourage open communication and relationships.
+3. Value Mining Exercise - Reflect on values related to relationships, community, and connection, helping the individual identify areas where they need support or companionship.
+4. Egocake - Reevaluate commitments to prioritize those that foster relationships, encourage social interactions, and promote emotional well-being.
+? Progression: Support intentional connection-building, aligning activities with relational values to create resilience.
+5. Sustained State (Medium to High in all areas)
+? Goal: Maintain balance and strengthen capacity across Energy, Purpose, and Connection for long-term sustainability.
+Tools & Resources:
+1. CHIEFF - Regularly reassess areas of life balance to ensure sustained fulfillment and productivity across personal and professional domains.
+2. 3x3 Capacity Matrix - Update top roles, goals, and control statements periodically to maintain clarity and keep goals aligned with evolving capacities.
+3. Personal Value Proposition - Refine purpose and values regularly to ensure actions and goals remain aligned with personal growth and life changes.
+4. Capacity Net Worth - Continue evaluating and adjusting where energy and capacity are invested, promoting sustainable commitment and fulfillment.
+? Progression: Keep the individual centered, adaptable, and aware of capacity needs to avoid slipping into burnout or depletion.
+6. Maximized State (High in all areas)
+? Goal: Optimize performance, deepen purpose, and prevent overextension by balancing high capacity with strategic renewal.
+Tools & Resources:
+1. Personal Value Proposition - Revisit to ensure purpose-driven decisions that maximize fulfillment and align with legacy goals.
+2. CHIEFF - Use as a proactive check-in tool to ensure life balance and detect early signs of overextension.
+3. Egocake - Prevent capacity creep by reevaluating layers regularly, resigning from additional responsibilities if needed.
+4. 3x3 Capacity Matrix - Maintain focus on key goals and roles, ensuring that new commitments align with high-priority areas.
+5. Resignation Exercise - Proactively release obligations that do not serve long-term goals or balanced capacity.
+? Progression: Prioritize sustainable engagement, avoid unnecessary overcommitment, and focus on maximizing high-value contributions.
+
+
+Suggested Points for Using the Healthy Capacity Checklist Audit
+1. After the Depleted and Indulgent States (Between Initial Tools and Reassessment)
+? Purpose: To evaluate the effectiveness of initial capacity-building efforts in regaining clarity, energy, and purpose.
+? Why Now: By this stage, users may have addressed immediate burnout risks, begun to release non-essential commitments, and started reconnecting with purpose. The checklist serves as a checkpoint to confirm improvements and identify any remaining weak areas.
+? Reflection and Action Plan: Based on the audit, users can refine goals for alignment, energy, and social connections before progressing further.
+2. Between the Fatigued and Reserved States (Before Entering Sustained State)
+? Purpose: To assess recovery progress and identify any lingering stressors in workload, boundaries, or social connection before moving into a balanced state.
+? Why Now: This is a transitional point where users are close to achieving a balanced state but may need a thorough reflection on workload, boundaries, and connections to ensure sustained progress. The checklist allows users to verify that foundational areas are stable and ready for long-term maintenance.
+? Reflection and Action Plan: Users can create an action plan to address any remaining stressors or areas that still feel imbalanced, helping them enter the Sustained state with confidence.
+3. Mid-Sustained State (Regular Check-In)
+? Purpose: To maintain balanced capacity in purpose, energy, and connection and proactively identify potential imbalances.
+? Why Now: Midway through the Sustained state, a regular audit helps ensure that users maintain a healthy capacity without slipping back into old patterns. This is a preventive measure that can reveal minor shifts before they become larger issues.
+? Reflection and Action Plan: Users can adjust their action plans based on insights gained, setting new goals or making small changes to reinforce purpose, manage workload, and maintain meaningful connections.
+4. Transition to Maximized State (Before Entering or Reassessing Maximized)
+? Purpose: To confirm that all areas are optimized and that the user can sustain high engagement across purpose, energy, and connection.
+? Why Now: The checklist helps users verify that they are ready to operate at an optimal level without risking burnout. It allows them to align their high-capacity state with personal values and set boundaries to sustain this level of engagement.
+? Reflection and Action Plan: Users can finalize or fine-tune an action plan to sustain high performance, set renewal strategies, and maintain boundaries. The checklist ensures they enter the Maximized state with a stable foundation and proactive support strategies.
+5. Periodic Checkpoint in Maximized State (Every 3-6 Months)
+? Purpose: To ensure continued alignment and prevent overextension.
+? Why Now: Even in the Maximized state, regular audits help users stay aware of capacity changes and prevent relapse into burnout. This proactive check maintains balance and aligns actions with purpose.
+? Reflection and Action Plan: Users can set ongoing, high-level goals based on audit results, ensuring they are intentionally sustaining their peak capacity.
+By incorporating the Healthy Capacity Checklist Audit at these strategic points, users can continuously monitor their progress, adjust their action plans, and ensure they are consistently aligned with their capacity-building goals. The audit thus becomes a dynamic tool, supporting the user at every stage of their journey to optimize purpose, energy, and connection.
+
+Updated November 12, 2024
+
