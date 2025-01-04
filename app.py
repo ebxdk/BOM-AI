@@ -74,7 +74,7 @@ for file_path in glob.glob(f"{folder_path}/*.txt"):  # Load all .txt files in th
     documents = loader.load()
     docs = text_splitter.split_documents(documents)
     all_docs.extend(docs)  # Collect all documents in a list
-
+print(f"Loaded {len(all_docs)} documents from {folder_path}.")
 
 
 # Create embeddings
