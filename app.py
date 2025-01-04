@@ -29,7 +29,7 @@ from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_community.vectorstores import Chroma
 
 # Initialize NLTK data path if needed
-nltk.data.path.append('/Users/NewUser1/nltk_data')  # Update this path if necessary
+nltk.data.path.append('/home/ebad_khan5487/nltk_data')  # Update this path if necessary
 
 app = Flask(__name__)
 app.secret_key = 'ebxd.k'  # Replace with your secret key
@@ -60,7 +60,7 @@ all_user_profiles = []
 # --------------------- RAG Setup with LangChain ---------------------
 
 # Path to the folder containing all the text files
-folder_path = '/Users/NewUser1/Desktop/CapacityCre/Datasets'  # Update this path
+folder_path = '/home/ebad_khan5487/BOM-AI/Datasets'  # Update this path
 
 # Split the documents into chunks
 text_splitter = RecursiveCharacterTextSplitter(
