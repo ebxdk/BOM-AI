@@ -28,7 +28,6 @@ from langchain_community.document_loaders import TextLoader
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_community.vectorstores import Chroma
 
-
 # Initialize NLTK data path if needed
 nltk.data.path.append('/Users/NewUser1/nltk_data')  # Update this path if necessary
 
