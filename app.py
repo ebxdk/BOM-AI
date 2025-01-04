@@ -69,11 +69,14 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 # Load and process each text file in the folder
 all_docs = []
-for file_path in glob.glob(f"{folder_path}/*.txt"):  # Load all .txt files in the folder
+doc_ids = []  # List to hold document IDs
+for idx, file_path in enumerate(glob.glob(f"{folder_path}/*.txt")):  # Load all .txt files in the folder
     loader = TextLoader(file_path)
     documents = loader.load()
     docs = text_splitter.split_documents(documents)
-    all_docs.extend(docs)  # Collect all documents in a list
+    all_docs.extend(docs)
+    # Generate an ID for each document
+    doc_ids.extend([f"doc_{idx}_{i}" for i in range(len(docs))])
 print(f"Loaded {len(all_docs)} documents from {folder_path}.")
 
 
@@ -81,7 +84,7 @@ print(f"Loaded {len(all_docs)} documents from {folder_path}.")
 embeddings = HuggingFaceEmbeddings(model_name='all-mpnet-base-v2')
 
 # Create a Chroma vector store
-vectorstore = Chroma.from_documents(all_docs, embeddings)
+vectorstore = Chroma.from_documents(all_docs, embeddings, ids=doc_ids)
 
 # Set up the LLM (ensure your OpenAI API key is set in the environment variables)
 llm = ChatOpenAI(model_name='gpt-4', temperature=0.6)
