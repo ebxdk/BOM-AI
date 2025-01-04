@@ -15,7 +15,7 @@ import torch
 
 
 # LangChain imports
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain_community.document_loaders import TextLoader
@@ -27,6 +27,7 @@ from langchain.chains import LLMChain
 from langchain_community.document_loaders import TextLoader
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_community.vectorstores import Chroma
+
 
 # Initialize NLTK data path if needed
 nltk.data.path.append('/Users/NewUser1/nltk_data')  # Update this path if necessary
