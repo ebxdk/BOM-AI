@@ -20,14 +20,167 @@ Here's the scoring criteria and definitions for each category based on the mappe
 These criteria guide users to assess which state best describes their current capacity, helping them make informed decisions about workload and commitments.
 
 
-CategoryEnergyPurposeConnectionDepletedLLL    IndulgentLLMIndulgentMLLIndulgentHLLIndulgentHLMIndulgentMLMIndulgentLLHIndulgentMLH    FatiguedLMLFatiguedLMMFatiguedLMHFatiguedLHMFatiguedLHH    ReservedMMLReservedHMLReservedHHLReservedMHLReservedLHL    SustainedMMMSustainedMHMSustainedHHMSustainedHMMSustainedMHH    MaximizedHHH
+Category
+Energy
+Purpose
+Connection
+Depleted
+L
+L
+L
+ 
+ 
+ 
+ 
+Indulgent
+L
+L
+M
+Indulgent
+M
+L
+L
+Indulgent
+H
+L
+L
+Indulgent
+H
+L
+M
+Indulgent
+M
+L
+M
+Indulgent
+L
+L
+H
+Indulgent
+M
+L
+H
+ 
+ 
+ 
+ 
+Fatigued
+L
+M
+L
+Fatigued
+L
+M
+M
+Fatigued
+L
+M
+H
+Fatigued
+L
+H
+M
+Fatigued
+L
+H
+H
+ 
+ 
+ 
+ 
+Reserved
+M
+M
+L
+Reserved
+H
+M
+L
+Reserved
+H
+H
+L
+Reserved
+M
+H
+L
+Reserved
+L
+H
+L
+ 
+ 
+ 
+ 
+Sustained
+M
+M
+M
+Sustained
+M
+H
+M
+Sustained
+H
+H
+M
+Sustained
+H
+M
+M
+Sustained
+M
+H
+H
+ 
+ 
+ 
+ 
+Maximized
+H
+H
+H
 
 
-0123456
-NeverA few times a year or lessOnce a month or lessA few times a monthOnce a weekA few times a weekEveryday
+
+0
+1
+2
+3
+4
+5
+6
+
+
+
+
+
+
+
+
+Never
+A few times a year or less
+Once a month or less
+A few times a month
+Once a week
+A few times a week
+Everyday
+
 Scoring Ranges for Each Component (Energy, Purpose, Connection)
 Each question is scored between 0 and 6, so the scores for each component range from 0 (all questions marked as 0) to 36 (all questions marked as 6). Here's how to interpret the scores:
-Score RangeLevelInterpretation0 - 18LowScores in this range indicate limited capacity, suggesting minimal engagement, motivation, or connection in this component.19 - 30MediumScores in this range reflect a balanced or moderately engaged level in this component, with some consistency.31 - 36HighScores in this range represent high capacity, with strong engagement, motivation, or connection in this component.Capacity States Based on Component Score Levels
+Score Range
+Level
+Interpretation
+0 - 18
+Low
+Scores in this range indicate limited capacity, suggesting minimal engagement, motivation, or connection in this component.
+19 - 30
+Medium
+Scores in this range reflect a balanced or moderately engaged level in this component, with some consistency.
+31 - 36
+High
+Scores in this range represent high capacity, with strong engagement, motivation, or connection in this component.
+Capacity States Based on Component Score Levels
 With these ranges, we can map each capacity state based on the specific score ranges for Energy, Purpose, and Connection:
 1. Depleted: Low in all components (scores of 0-18 in Energy, Purpose, and Connection).
 ? Description: The individual's scores indicate they feel depleted across all areas, with minimal energy, purpose, or connection, posing a high risk of burnout.
