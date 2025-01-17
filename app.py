@@ -11,8 +11,7 @@ from transformers import BartForConditionalGeneration, BartTokenizer
 from flask_cors import CORS
 import multiprocessing
 import torch
-
-
+import openai  # Add this import for the OpenAI API
 
 # LangChain imports
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -28,12 +27,11 @@ from langchain_community.document_loaders import TextLoader
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_community.vectorstores import Chroma
 
-
 app = Flask(__name__)
 
 # Environment variables
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-openai.api_key = os.getenv('OPENAI_API_KEY')
+openai.api_key = os.getenv('OPENAI_API_KEY')  # Ensure your API key is set in the environment
 
 # Load the paraphrase model
 paraphrase_model = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
