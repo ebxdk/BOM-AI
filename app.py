@@ -622,13 +622,25 @@ def chat():
     redis_client = app.config['SESSION_REDIS']
     user_profile_key = f"user_profile:{username}"
     profile_data = redis_client.get(user_profile_key)
-    if profile_data:
-        profile = json.loads(profile_data)
-    else:
-        profile = {}
+    # Create a default profile if none exists
+    if not profile_data:
+        profile_data = {
+            "username": username,
+            "assessment_completed": False,
+            "baseline_scores": {
+                "energy": 0,
+                "purpose": 0,
+                "connection": 0
+            },
+            "total_score": 0,
+            "user_state": "Unknown",
+            "recommendations": [],
+            "recommendation_message": "No recommendation available"
+        }
+        redis_client.set(user_profile_key, json.dumps(profile_data))
 
-    if not user_log or not profile:
-        return jsonify({"response": "No data found for the user."})
+    # Load the profile data
+    profile = json.loads(profile_data)
 
     # Retrieve relevant context from the vector store
     retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
