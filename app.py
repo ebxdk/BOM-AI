@@ -96,7 +96,7 @@ def chat():
     docs = retriever.get_relevant_documents(user_message)
     context = "\n\n".join([doc.page_content for doc in docs])
 
-    # Create input for LangChain
+    # Prepare input for the QA chain
     chain_input = {
         'username': username,
         'energy_score': energy_score,
@@ -104,15 +104,19 @@ def chat():
         'connection_score': connection_score,
         'user_state': user_state,
         'context': context,
-        'chat_history': memory.load_memory_variables({})['chat_history'],
+        'chat_history': memory.load_memory_variables({}).get('chat_history', []),
         'question': user_message
     }
 
-    # Get response from QA chain
-    response = qa_chain(chain_input)
-    chat_response = response['text']
+    try:
+        # Run the chain
+        response = qa_chain(chain_input)
+        chat_response = response['text']
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     return jsonify({"response": chat_response})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=False)
