@@ -90,15 +90,18 @@ def chat():
 
     # Prepare the input for the QA chain
     chain_input = {
-        'username': username,
-        'energy_score': energy_score,
-        'purpose_score': purpose_score,
-        'connection_score': connection_score,
-        'user_state': user_state,
-        'context': context,
-        'chat_history': memory.load_memory_variables({}).get('chat_history', []),
-        'question': user_message
-    }
+        "input": {
+            'username': username,
+            'energy_score': energy_score,
+            'purpose_score': purpose_score,
+            'connection_score': connection_score,
+            'user_state': user_state,
+            'context': context,
+            'chat_history': memory.load_memory_variables({}).get('chat_history', []),
+            'question': user_message
+        }
+}
+
 
     try:
         # Pass the input to the QA chain
