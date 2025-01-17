@@ -1,44 +1,33 @@
-from flask import Flask, request, render_template, jsonify, session, redirect, url_for, send_file
+from flask import Flask, request, jsonify
 import os
-import datetime
-import numpy as np
-import nltk
-import redis
-from flask_session import Session
-import json
-import glob 
 from transformers import BartForConditionalGeneration, BartTokenizer
 from flask_cors import CORS
-import multiprocessing
-import torch
-import openai  # Add this import for the OpenAI API
-
-# LangChain imports
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain.chains import ConversationalRetrievalChain
-from langchain_community.document_loaders import TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
-from langchain.retrievers.self_query.base import SelfQueryRetriever
-from langchain_community.vectorstores import Chroma
+import glob
 
+# Initialize the Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Environment variables
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-openai.api_key = os.getenv('OPENAI_API_KEY')  # Ensure your API key is set in the environment
+openai_api_key = os.getenv('OPENAI_API_KEY')
+if not openai_api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set.")
 
 # Load the paraphrase model
 paraphrase_model = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
 paraphrase_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
 
 # Load documents for RAG
-folder_path = '/home/ebad_khan5487/BOM-AI/Datasets'  # Updated based on your initial file
+folder_path = '/home/ebad_khan5487/BOM-AI/Datasets'  # Update this path if necessary
 all_docs = []
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=200)
 
@@ -54,6 +43,7 @@ vectorstore = Chroma.from_documents(all_docs, embeddings)
 # Set up LangChain components
 llm = ChatOpenAI(model_name='gpt-4', temperature=0.6)
 memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+
 prompt_template = """
 You are a helpful AI assistant. Use the following user context and retrieved data to answer their question clearly and concisely.
 
@@ -84,6 +74,7 @@ qa_chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json
+
     # Extract user inputs
     user_message = data.get('message', '')
     username = data.get('username', 'User')
@@ -119,8 +110,6 @@ def chat():
 
     # Return the chatbot's response
     return jsonify({"response": chat_response})
-
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=False)
