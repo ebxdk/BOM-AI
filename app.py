@@ -1,15 +1,33 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, render_template, jsonify, session, redirect, url_for, send_file
 import os
+import datetime
+import numpy as np
+import nltk
+import redis
+from flask_session import Session
+import json
+import glob 
 from transformers import BartForConditionalGeneration, BartTokenizer
+from flask_cors import CORS
+import multiprocessing
+import torch
+
+
+
+# LangChain imports
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
-from langchain.chains import LLMChain
+from langchain_community.vectorstores import FAISS
+from langchain.chains import ConversationalRetrievalChain
+from langchain_community.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.chains import LLMChain
 from langchain_community.document_loaders import TextLoader
-import glob
+from langchain.retrievers.self_query.base import SelfQueryRetriever
+from langchain_community.vectorstores import Chroma
+
 
 app = Flask(__name__)
 
