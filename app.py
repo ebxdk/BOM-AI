@@ -84,7 +84,8 @@ qa_chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json
-    user_message = data.get('message')
+    # Extract user inputs
+    user_message = data.get('message', '')
     username = data.get('username', 'User')
     energy_score = data.get('energy_score', 0)
     purpose_score = data.get('purpose_score', 0)
@@ -96,7 +97,7 @@ def chat():
     docs = retriever.get_relevant_documents(user_message)
     context = "\n\n".join([doc.page_content for doc in docs])
 
-    # Prepare input for the QA chain
+    # Prepare the input for the QA chain
     chain_input = {
         'username': username,
         'energy_score': energy_score,
@@ -109,13 +110,16 @@ def chat():
     }
 
     try:
-        # Run the chain
+        # Pass the input to the QA chain
         response = qa_chain(chain_input)
         chat_response = response['text']
     except Exception as e:
+        # Log and return the error if the chain fails
         return jsonify({"error": str(e)}), 500
 
+    # Return the chatbot's response
     return jsonify({"response": chat_response})
+
 
 
 if __name__ == '__main__':
