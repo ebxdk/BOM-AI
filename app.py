@@ -615,74 +615,51 @@ def set_username():
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json.get('message')
-    if not user_message:
-        return jsonify({"error": "Message is required"}), 400
+    username = request.json.get('username')
 
-    username = request.json.get('username', 'User')
-    
-    # Retrieve user profile from Redis
-    redis_client = app.config['SESSION_REDIS']
-    user_profile_key = f"user_profile:{username}"
-    
-    try:
-        profile_data = redis_client.get(user_profile_key)
-        if profile_data:
-            if isinstance(profile_data, bytes):
-                profile_data = profile_data.decode('utf-8')  # Decode bytes to string
-            profile = json.loads(profile_data)  # Convert JSON string to dict
-        else:
-            # Create a default profile if none exists
-            profile = {
-                "username": username,
-                "assessment_completed": False,
-                "baseline_scores": {
-                    "energy": 0,
-                    "purpose": 0,
-                    "connection": 0
-                },
-                "total_score": 0,
-                "user_state": "Unknown",
-                "recommendations": [],
-                "recommendation_message": "No recommendation available"
-            }
-            redis_client.set(user_profile_key, json.dumps(profile))
-    except Exception as e:
-        print(f"Redis error: {str(e)}")
-        return jsonify({"error": "Unable to retrieve user data. Please try again later."}), 500
+    # Validate username
+    if not username or not validate_username(username):
+        return jsonify({"error": "Invalid or missing username."}), 400
 
-    # Rest of the logic remains unchanged
-    # Retrieve relevant context from the vector store
-    retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
-    try:
-        docs = retriever.get_relevant_documents(user_message)
-    except Exception as e:
-        print(f"Retriever error: {str(e)}")
-        return jsonify({"error": "Failed to retrieve context."}), 500
+    # Generate Redis keys for profile and chat history
+    user_profile_key = generate_redis_key(username)
+    chat_history_key = f"chat_history:{username}"
 
-    context = "\n\n".join([doc.page_content for doc in docs])
+    # Retrieve or initialize user profile
+    profile_data = redis_client.get(user_profile_key)
+    if profile_data:
+        profile = json.loads(profile_data)
+    else:
+        profile = {
+            "username": username,
+            "assessment_completed": False,
+            "baseline_scores": {"energy": 0, "purpose": 0, "connection": 0},
+            "total_score": 0,
+            "user_state": "Unknown",
+            "recommendations": [],
+            "recommendation_message": "No recommendation available"
+        }
+        redis_client.set(user_profile_key, json.dumps(profile))
 
-    # Format recommendations for the chat context
-    recommendations = profile.get('recommendations', [])
-    recommendation_text = "\n".join(
-        f"{i + 1}. {rec.get('tool', 'Unknown')} (Duration: {rec.get('duration', 'Unknown')} days)"
-        for i, rec in enumerate(recommendations)
-    )
+    # Retrieve user-specific chat history
+    chat_history = redis_client.get(chat_history_key)
+    if chat_history:
+        chat_history = json.loads(chat_history)
+    else:
+        chat_history = []
 
-    # Create the input for the LangChain conversation
-    chat_history = memory.load_memory_variables({}).get('chat_history', [])
+    # Process the chat with the LangChain QA chain
     chain_input = {
         'username': username,
         'energy_score': profile['baseline_scores'].get('energy', 0),
         'purpose_score': profile['baseline_scores'].get('purpose', 0),
         'connection_score': profile['baseline_scores'].get('connection', 0),
         'user_state': profile.get('user_state', 'Unknown'),
-        'recommendations': recommendation_text.strip(),
         'question': user_message,
-        'context': context,
+        'context': "",  # Add context retrieval if needed
         'chat_history': chat_history,
     }
 
-    # Run the input through the LangChain QA chain
     try:
         response = qa_chain(chain_input)
         chat_response = response['text']
@@ -690,28 +667,14 @@ def chat():
         print(f"QA Chain error: {str(e)}")
         return jsonify({"error": "Failed to process the chat request."}), 500
 
-    # Record user interaction in profile
-    interaction = {
-        'timestamp': datetime.datetime.now().isoformat(),
-        'user_message': user_message,
-        'assistant_response': chat_response,
-        'recommendations': recommendation_text.strip()
-    }
-    profile.setdefault('interaction_history', []).append(interaction)
+    # Update chat history and save it
+    chat_history.append({"role": "user", "message": user_message})
+    chat_history.append({"role": "assistant", "message": chat_response})
+    redis_client.set(chat_history_key, json.dumps(chat_history))
 
-    # Update the profile in Redis
-    try:
-        redis_client.set(user_profile_key, json.dumps(profile))
-    except Exception as e:
-        print(f"Redis save error: {str(e)}")
-
-    # Update session history for chat display
-    session['history'] = session.get('history', [])
-    session['history'].append({'role': 'user', 'message': user_message})
-    session['history'].append({'role': 'assistant', 'message': chat_response})
-    session.modified = True
-
+    # Return the assistant's response
     return jsonify({"response": chat_response})
+
 
 # --------------------- THE UPDATED ENDPOINT FOR SIMPLE API CALLS ---------------------
 @app.route('/api/chat', methods=['POST'])
