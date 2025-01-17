@@ -614,60 +614,62 @@ def set_username():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_message = request.json['message']
-    username = session.get('username', 'User')
-    user_log = session.get('result', None)
+    user_message = request.json.get('message')
+    if not user_message:
+        return jsonify({"error": "Message is required"}), 400
 
+    username = request.json.get('username', 'User')
+    
     # Retrieve user profile from Redis
     redis_client = app.config['SESSION_REDIS']
     user_profile_key = f"user_profile:{username}"
-    profile_data = redis_client.get(user_profile_key)
-    # Create a default profile if none exists
-    if not profile_data:
-        profile_data = {
-            "username": username,
-            "assessment_completed": False,
-            "baseline_scores": {
-                "energy": 0,
-                "purpose": 0,
-                "connection": 0
-            },
-            "total_score": 0,
-            "user_state": "Unknown",
-            "recommendations": [],
-            "recommendation_message": "No recommendation available"
-        }
-        redis_client.set(user_profile_key, json.dumps(profile_data))
+    
+    try:
+        profile_data = redis_client.get(user_profile_key)
+        if profile_data:
+            if isinstance(profile_data, bytes):
+                profile_data = profile_data.decode('utf-8')  # Decode bytes to string
+            profile = json.loads(profile_data)  # Convert JSON string to dict
+        else:
+            # Create a default profile if none exists
+            profile = {
+                "username": username,
+                "assessment_completed": False,
+                "baseline_scores": {
+                    "energy": 0,
+                    "purpose": 0,
+                    "connection": 0
+                },
+                "total_score": 0,
+                "user_state": "Unknown",
+                "recommendations": [],
+                "recommendation_message": "No recommendation available"
+            }
+            redis_client.set(user_profile_key, json.dumps(profile))
+    except Exception as e:
+        print(f"Redis error: {str(e)}")
+        return jsonify({"error": "Unable to retrieve user data. Please try again later."}), 500
 
-    # Load the profile data
-    profile = json.loads(profile_data)
-
+    # Rest of the logic remains unchanged
     # Retrieve relevant context from the vector store
     retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
-    docs = self_query_retriever.get_relevant_documents(user_message)
-    print("Self-querying retrieval filters applied for query:", user_message)
-
-    # Print each document's content and metadata
-    print("Retrieved Documents:")
-    for i, doc in enumerate(docs):
-        print(f"Document {i + 1}:")
-        print("Content:", doc.page_content)
-        if hasattr(doc, "metadata"):
-            print("Metadata:", doc.metadata)
-        print("-" * 400)
+    try:
+        docs = retriever.get_relevant_documents(user_message)
+    except Exception as e:
+        print(f"Retriever error: {str(e)}")
+        return jsonify({"error": "Failed to retrieve context."}), 500
 
     context = "\n\n".join([doc.page_content for doc in docs])
 
     # Format recommendations for the chat context
     recommendations = profile.get('recommendations', [])
-    recommendation_text = ""
-    for i, rec in enumerate(recommendations):
-        tool = rec['tool']
-        sequence = rec['sequence']
-        duration = rec['duration']
-        recommendation_text += f"{i + 1}. {tool} (Duration: {duration} days)\n"
+    recommendation_text = "\n".join(
+        f"{i + 1}. {rec.get('tool', 'Unknown')} (Duration: {rec.get('duration', 'Unknown')} days)"
+        for i, rec in enumerate(recommendations)
+    )
 
     # Create the input for the LangChain conversation
+    chat_history = memory.load_memory_variables({}).get('chat_history', [])
     chain_input = {
         'username': username,
         'energy_score': profile['baseline_scores'].get('energy', 0),
@@ -677,17 +679,16 @@ def chat():
         'recommendations': recommendation_text.strip(),
         'question': user_message,
         'context': context,
-        'chat_history': memory.load_memory_variables({})['chat_history']
+        'chat_history': chat_history,
     }
-    
-    # Run the input through the LangChain QA chain
-    response = qa_chain(chain_input)
-    chat_response = response['text']
 
-    # Check if the user asked the same question before
-    if 'history' in session and any(item['message'] == user_message for item in session['history']):
-        # Paraphrase the response
-        chat_response = paraphrase_bart(chat_response)
+    # Run the input through the LangChain QA chain
+    try:
+        response = qa_chain(chain_input)
+        chat_response = response['text']
+    except Exception as e:
+        print(f"QA Chain error: {str(e)}")
+        return jsonify({"error": "Failed to process the chat request."}), 500
 
     # Record user interaction in profile
     interaction = {
@@ -697,16 +698,18 @@ def chat():
         'recommendations': recommendation_text.strip()
     }
     profile.setdefault('interaction_history', []).append(interaction)
-    
+
     # Update the profile in Redis
-    redis_client.set(user_profile_key, json.dumps(profile))
-    session.modified = True
+    try:
+        redis_client.set(user_profile_key, json.dumps(profile))
+    except Exception as e:
+        print(f"Redis save error: {str(e)}")
 
     # Update session history for chat display
-    if 'history' not in session:
-        session['history'] = []
+    session['history'] = session.get('history', [])
     session['history'].append({'role': 'user', 'message': user_message})
     session['history'].append({'role': 'assistant', 'message': chat_response})
+    session.modified = True
 
     return jsonify({"response": chat_response})
 
