@@ -27,7 +27,7 @@ paraphrase_model = BartForConditionalGeneration.from_pretrained('facebook/bart-l
 paraphrase_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
 
 # Load documents for RAG
-folder_path = '/home/ebad_khan5487/BOM-AI/Datasets'  # Update this path if necessary
+folder_path = '/home/ebad_khan5487/BOM-AI/Datasets'  # Update this path if needed
 all_docs = []
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=200)
 
@@ -41,7 +41,11 @@ embeddings = HuggingFaceEmbeddings(model_name='all-mpnet-base-v2')
 vectorstore = Chroma.from_documents(all_docs, embeddings)
 
 # Set up LangChain components
-llm = ChatOpenAI(model_name='gpt-4', temperature=0.6)
+llm = ChatOpenAI(
+    model_name='gpt-4',  # or "gpt-3.5-turbo" if GPT-4 is unavailable
+    temperature=0.6,
+    openai_api_key=openai_api_key
+)
 memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
 
 prompt_template = """
@@ -66,7 +70,11 @@ Assistant Response:
 
 prompt = PromptTemplate(
     template=prompt_template,
-    input_variables=['username', 'energy_score', 'purpose_score', 'connection_score', 'user_state', 'context', 'chat_history', 'question']
+    input_variables=[
+        'username', 'energy_score', 'purpose_score',
+        'connection_score', 'user_state', 'context',
+        'chat_history', 'question'
+    ]
 )
 
 qa_chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
@@ -76,7 +84,11 @@ def chat():
     data = request.json
 
     # Validate input
-    required_fields = ['message', 'username', 'energy_score', 'purpose_score', 'connection_score', 'user_state', 'context', 'chat_history']
+    required_fields = [
+        'message', 'username', 'energy_score',
+        'purpose_score', 'connection_score',
+        'user_state', 'context', 'chat_history'
+    ]
     missing_fields = [field for field in required_fields if field not in data]
     if missing_fields:
         return jsonify({"error": f"Missing required fields: {missing_fields}"}), 400
@@ -88,17 +100,18 @@ def chat():
     purpose_score = data['purpose_score']
     connection_score = data['connection_score']
     user_state = data['user_state']
-    context = data['context']
-    chat_history = data['chat_history']
+    context = data['context']  # This might be an empty string if none is provided
+    chat_history = data['chat_history']  # Typically a list of messages
 
-    # Retrieve relevant context
+    # Retrieve relevant context from vectorstore
     retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
     try:
-        docs = retriever.invoke(user_message)  # Updated for LangChain 1.0+
+        docs = retriever.get_relevant_documents(user_message)
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve context: {str(e)}"}), 500
 
-    context = "\n\n".join([doc.page_content for doc in docs])
+    # Combine retrieved documents into a single string
+    retrieved_context = "\n\n".join([doc.page_content for doc in docs])
 
     # Prepare the input for the QA chain
     chain_input = {
@@ -107,14 +120,14 @@ def chat():
         'purpose_score': purpose_score,
         'connection_score': connection_score,
         'user_state': user_state,
-        'context': context,
+        'context': retrieved_context,
         'chat_history': chat_history,
         'question': user_message
     }
 
     try:
         # Pass the input to the QA chain
-        response = qa_chain.invoke(chain_input)  # Use `invoke` for LangChain 1.0+
+        response = qa_chain.invoke(chain_input)  # This is correct in newer LangChain versions
         chat_response = response['text']
     except Exception as e:
         # Log and return the error if the chain fails
@@ -124,4 +137,6 @@ def chat():
     return jsonify({"response": chat_response})
 
 if __name__ == '__main__':
+    # Make sure to adjust host and port if necessary.
+    # Also consider setting debug=False for production.
     app.run(host='0.0.0.0', port=5001, debug=False)
