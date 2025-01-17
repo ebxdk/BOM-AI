@@ -75,17 +75,29 @@ qa_chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
 def chat():
     data = request.json
 
+    # Validate input
+    required_fields = ['message', 'username', 'energy_score', 'purpose_score', 'connection_score', 'user_state', 'context', 'chat_history']
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        return jsonify({"error": f"Missing required fields: {missing_fields}"}), 400
+
     # Extract user inputs
-    user_message = data.get('message', '')
-    username = data.get('username', 'User')
-    energy_score = data.get('energy_score', 0)
-    purpose_score = data.get('purpose_score', 0)
-    connection_score = data.get('connection_score', 0)
-    user_state = data.get('user_state', 'Unknown')
+    user_message = data['message']
+    username = data['username']
+    energy_score = data['energy_score']
+    purpose_score = data['purpose_score']
+    connection_score = data['connection_score']
+    user_state = data['user_state']
+    context = data['context']
+    chat_history = data['chat_history']
 
     # Retrieve relevant context
     retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
-    docs = retriever.get_relevant_documents(user_message)
+    try:
+        docs = retriever.invoke(user_message)  # Updated for LangChain 1.0+
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve context: {str(e)}"}), 500
+
     context = "\n\n".join([doc.page_content for doc in docs])
 
     # Prepare the input for the QA chain
@@ -96,17 +108,17 @@ def chat():
         'connection_score': connection_score,
         'user_state': user_state,
         'context': context,
-        'chat_history': memory.load_memory_variables({}).get('chat_history', []),
+        'chat_history': chat_history,
         'question': user_message
     }
 
     try:
         # Pass the input to the QA chain
-        response = qa_chain(chain_input)
+        response = qa_chain.invoke(chain_input)  # Use `invoke` for LangChain 1.0+
         chat_response = response['text']
     except Exception as e:
         # Log and return the error if the chain fails
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"QA Chain Error: {str(e)}"}), 500
 
     # Return the chatbot's response
     return jsonify({"response": chat_response})
