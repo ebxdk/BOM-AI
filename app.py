@@ -675,19 +675,33 @@ def chat():
     else:
         chat_history = []
 
-    # Process the chat with the LangChain QA chain
+    # Format recommendations for the chat context
+    recommendations = profile.get('recommendations', [])
+    recommendation_text = ""
+    for i, rec in enumerate(recommendations):
+        tool = rec.get('tool', "Unknown Tool")
+        sequence = rec.get('sequence', "Unknown Sequence")
+        duration = rec.get('duration', "Unknown Duration")
+        recommendation_text += f"{i + 1}. {tool} (Duration: {duration} days)\n"
+
+    # Create the input for the LangChain conversation
     chain_input = {
         'username': username,
         'energy_score': profile['baseline_scores'].get('energy', 0),
         'purpose_score': profile['baseline_scores'].get('purpose', 0),
         'connection_score': profile['baseline_scores'].get('connection', 0),
         'user_state': profile.get('user_state', 'Unknown'),
-        'question': user_message,
+        'recommendations': recommendation_text.strip(),  # Ensure recommendations is a string
         'context': "",  # Add context retrieval if needed
         'chat_history': chat_history,
+        'question': user_message
     }
 
+    # Debug log for chain_input
+    print("Chain Input:", chain_input)
+
     try:
+        # Process the chat with the LangChain QA chain
         response = qa_chain(chain_input)
         chat_response = response['text']
     except Exception as e:
@@ -701,6 +715,7 @@ def chat():
 
     # Return the assistant's response
     return jsonify({"response": chat_response})
+
 
 
 # --------------------- THE UPDATED ENDPOINT FOR SIMPLE API CALLS ---------------------
