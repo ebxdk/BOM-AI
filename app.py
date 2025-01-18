@@ -12,6 +12,7 @@ from flask_cors import CORS
 import multiprocessing
 import torch
 import re
+import hashlib
 
 # LangChain imports
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -620,6 +621,14 @@ def validate_username(username):
     and underscores and is between 1-30 characters long.
     """
     return bool(re.match(r'^\w{1,30}$', username))
+
+def generate_redis_key(username):
+    """
+    Generates a hashed Redis key for the given username.
+    This ensures keys are unique and secure.
+    """
+    return f"user_profile:{hashlib.sha256(username.encode()).hexdigest()}"
+
 
 
 @app.route('/chat', methods=['POST'])
