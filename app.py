@@ -47,6 +47,14 @@ app.config['SERVER_NAME'] = None
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+# Initialize Redis client
+redis_client = redis.StrictRedis(
+    host='localhost',  # Update this if Redis is running on another host
+    port=6379,         # Default Redis port
+    db=0,              # Use the default database
+    decode_responses=True  # Automatically decode responses to strings
+)
+
 paraphrase_model = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
 paraphrase_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
 
