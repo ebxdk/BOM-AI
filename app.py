@@ -641,85 +641,63 @@ def generate_redis_key(username):
 
 @app.route('/chat', methods=['POST'])
 def chat():
+    # Parse input JSON
     user_message = request.json.get('message')
-    username = request.json.get('username')
+    username = request.json.get('username', 'Anonymous')
+    chat_history = request.json.get('chat_history', [])
+    user_state = request.json.get('user_state', 'Unknown')
     energy_score = request.json.get('energy_score', 0)
     purpose_score = request.json.get('purpose_score', 0)
     connection_score = request.json.get('connection_score', 0)
-    user_state = request.json.get('user_state', "Unknown")
+    recommendations = request.json.get('recommendations', "No recommendations available.")
 
-    # Validate username
-    if not username or not validate_username(username):
-        return jsonify({"error": "Invalid or missing username."}), 400
+    # Validate input
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
 
-    # Generate Redis keys
-    user_profile_key = generate_redis_key(username)
-    chat_history_key = f"chat_history:{username}"
-
-    # Retrieve or initialize user profile
-    profile_data = redis_client.get(user_profile_key)
-    if profile_data:
-        profile = json.loads(profile_data)
-    else:
-        profile = {
-            "username": username,
-            "assessment_completed": False,
-            "baseline_scores": {"energy": energy_score, "purpose": purpose_score, "connection": connection_score},
-            "total_score": energy_score + purpose_score + connection_score,
-            "user_state": user_state,
-            "recommendations": [],
-            "recommendation_message": "No recommendation available"
-        }
-        redis_client.set(user_profile_key, json.dumps(profile))
-
-    # Retrieve chat history
-    chat_history = redis_client.get(chat_history_key)
-    if chat_history:
-        chat_history = json.loads(chat_history)
-    else:
-        chat_history = []
-
-    # Retrieve relevant context from the vector store
-    retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
-    docs = retriever.get_relevant_documents(user_message)
-    context = "\n\n".join([doc.page_content for doc in docs])
-
-    # Debugging: Log the retrieved documents
-    print("Retrieved Documents for Query:", user_message)
-    for idx, doc in enumerate(docs, start=1):
-        print(f"Document {idx}:\n{doc.page_content}\n")
-
-    # Prepare input for QA chain
-    chain_input = {
-        'username': username,
-        'energy_score': profile['baseline_scores'].get('energy', 0),
-        'purpose_score': profile['baseline_scores'].get('purpose', 0),
-        'connection_score': profile['baseline_scores'].get('connection', 0),
-        'user_state': profile.get('user_state', "Unknown"),
-        'question': user_message,
-        'context': context,  # Inject the retrieved context
-        'chat_history': chat_history,
-    }
-
-    # Debugging: Log chain input
-    print("Chain Input:", chain_input)
-
-    # Generate response
     try:
+        # Advanced RAG - Retrieve relevant documents
+        retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
+        retrieved_docs = retriever.get_relevant_documents(user_message)
+        context = "\n\n".join([doc.page_content for doc in retrieved_docs])
+
+        # Self-query retrieval for deeper personalization
+        self_query_docs = self_query_retriever.get_relevant_documents(user_message)
+        self_query_context = "\n\n".join([doc.page_content for doc in self_query_docs])
+
+        # Combine retrieved contexts
+        combined_context = f"{context}\n\n{self_query_context}"
+
+        # Prepare input for the LangChain chain
+        chain_input = {
+            'username': username,
+            'energy_score': energy_score,
+            'purpose_score': purpose_score,
+            'connection_score': connection_score,
+            'user_state': user_state,
+            'recommendations': recommendations,
+            'context': combined_context,
+            'chat_history': chat_history,
+            'question': user_message
+        }
+
+        # Generate response using the QA chain
         response = qa_chain(chain_input)
         chat_response = response['text']
+
+        # Update chat history
+        chat_history.append({"role": "user", "message": user_message})
+        chat_history.append({"role": "assistant", "message": chat_response})
+
+        # Return the chatbot's response
+        return jsonify({
+            "response": chat_response,
+            "chat_history": chat_history
+        })
+
     except Exception as e:
-        print(f"QA Chain Error: {e}")
+        print(f"Error processing chat request: {e}")
         return jsonify({"error": "Failed to process the chat request."}), 500
-
-    # Update chat history
-    chat_history.append({"role": "user", "message": user_message})
-    chat_history.append({"role": "assistant", "message": chat_response})
-    redis_client.set(chat_history_key, json.dumps(chat_history))
-
-    return jsonify({"response": chat_response})
-
-
 
 
 # --------------------- THE UPDATED ENDPOINT FOR SIMPLE API CALLS ---------------------
