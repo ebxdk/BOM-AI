@@ -11,6 +11,7 @@ from transformers import BartForConditionalGeneration, BartTokenizer
 from flask_cors import CORS
 import multiprocessing
 import torch
+import re
 
 # LangChain imports
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -611,6 +612,15 @@ def set_username():
     
     session.modified = True
     return redirect(url_for('index'))
+
+
+def validate_username(username):
+    """
+    Validates the username to ensure it only contains alphanumeric characters
+    and underscores and is between 1-30 characters long.
+    """
+    return bool(re.match(r'^\w{1,30}$', username))
+
 
 @app.route('/chat', methods=['POST'])
 def chat():
