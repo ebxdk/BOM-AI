@@ -643,12 +643,16 @@ def generate_redis_key(username):
 def chat():
     user_message = request.json.get('message')
     username = request.json.get('username')
+    energy_score = request.json.get('energy_score', 0)
+    purpose_score = request.json.get('purpose_score', 0)
+    connection_score = request.json.get('connection_score', 0)
+    user_state = request.json.get('user_state', "Unknown")
 
     # Validate username
     if not username or not validate_username(username):
         return jsonify({"error": "Invalid or missing username."}), 400
 
-    # Generate Redis keys for profile and chat history
+    # Generate Redis keys
     user_profile_key = generate_redis_key(username)
     chat_history_key = f"chat_history:{username}"
 
@@ -660,61 +664,61 @@ def chat():
         profile = {
             "username": username,
             "assessment_completed": False,
-            "baseline_scores": {"energy": 0, "purpose": 0, "connection": 0},
-            "total_score": 0,
-            "user_state": "Unknown",
+            "baseline_scores": {"energy": energy_score, "purpose": purpose_score, "connection": connection_score},
+            "total_score": energy_score + purpose_score + connection_score,
+            "user_state": user_state,
             "recommendations": [],
             "recommendation_message": "No recommendation available"
         }
         redis_client.set(user_profile_key, json.dumps(profile))
 
-    # Retrieve user-specific chat history
+    # Retrieve chat history
     chat_history = redis_client.get(chat_history_key)
     if chat_history:
         chat_history = json.loads(chat_history)
     else:
         chat_history = []
 
-    # Format recommendations for the chat context
-    recommendations = profile.get('recommendations', [])
-    recommendation_text = ""
-    for i, rec in enumerate(recommendations):
-        tool = rec.get('tool', "Unknown Tool")
-        sequence = rec.get('sequence', "Unknown Sequence")
-        duration = rec.get('duration', "Unknown Duration")
-        recommendation_text += f"{i + 1}. {tool} (Duration: {duration} days)\n"
+    # Retrieve relevant context from the vector store
+    retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
+    docs = retriever.get_relevant_documents(user_message)
+    context = "\n\n".join([doc.page_content for doc in docs])
 
-    # Create the input for the LangChain conversation
+    # Debugging: Log the retrieved documents
+    print("Retrieved Documents for Query:", user_message)
+    for idx, doc in enumerate(docs, start=1):
+        print(f"Document {idx}:\n{doc.page_content}\n")
+
+    # Prepare input for QA chain
     chain_input = {
         'username': username,
         'energy_score': profile['baseline_scores'].get('energy', 0),
         'purpose_score': profile['baseline_scores'].get('purpose', 0),
         'connection_score': profile['baseline_scores'].get('connection', 0),
-        'user_state': profile.get('user_state', 'Unknown'),
-        'recommendations': recommendation_text.strip(),  # Ensure recommendations is a string
-        'context': "",  # Add context retrieval if needed
+        'user_state': profile.get('user_state', "Unknown"),
+        'question': user_message,
+        'context': context,  # Inject the retrieved context
         'chat_history': chat_history,
-        'question': user_message
     }
 
-    # Debug log for chain_input
+    # Debugging: Log chain input
     print("Chain Input:", chain_input)
 
+    # Generate response
     try:
-        # Process the chat with the LangChain QA chain
         response = qa_chain(chain_input)
         chat_response = response['text']
     except Exception as e:
-        print(f"QA Chain error: {str(e)}")
+        print(f"QA Chain Error: {e}")
         return jsonify({"error": "Failed to process the chat request."}), 500
 
-    # Update chat history and save it
+    # Update chat history
     chat_history.append({"role": "user", "message": user_message})
     chat_history.append({"role": "assistant", "message": chat_response})
     redis_client.set(chat_history_key, json.dumps(chat_history))
 
-    # Return the assistant's response
     return jsonify({"response": chat_response})
+
 
 
 
