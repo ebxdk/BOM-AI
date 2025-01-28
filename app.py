@@ -693,20 +693,30 @@ def chat():
         response = qa_chain(chain_input)
         chat_response = response['text']
 
+        # Improve response formatting
+        formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response)  # Add newlines around headers
+        formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response.strip())  # Ensure proper spacing
+
+        # Strip unnecessary quotation marks
+        if formatted_response.startswith('"') and formatted_response.endswith('"'):
+            formatted_response = formatted_response[1:-1]
+
         # Update chat history
         chat_history.append({"role": "user", "message": user_message})
-        chat_history.append({"role": "assistant", "message": chat_response})
+        chat_history.append({"role": "assistant", "message": formatted_response})
 
         # Return the chatbot's response
         return jsonify({
-            "response": chat_response,
+            "response": formatted_response,
             "chat_history": chat_history
         })
 
     except Exception as e:
         print(f"Error processing chat request: {e}")
-        return jsonify({"error": "Failed to process the chat request."}), 500
-
+        return jsonify({
+            "error": "Failed to process the chat request. Please try again later.",
+            "details": str(e)
+        }), 500
 
 # --------------------- THE UPDATED ENDPOINT FOR SIMPLE API CALLS ---------------------
 @app.route('/api/chat', methods=['POST'])
