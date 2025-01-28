@@ -667,7 +667,8 @@ def chat():
         return jsonify({"error": "No message provided"}), 400
 
     try:
-        # Advanced RAG - Retrieve relevant documents
+        # --------------------- Advanced RAG: DO NOT CHANGE ---------------------
+        # Retrieve relevant documents
         retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
         retrieved_docs = retriever.get_relevant_documents(user_message)
         context = "\n\n".join([doc.page_content for doc in retrieved_docs])
@@ -678,6 +679,7 @@ def chat():
 
         # Combine retrieved contexts
         combined_context = f"{context}\n\n{self_query_context}"
+        # ----------------------------------------------------------------------
 
         # Prepare input for the LangChain chain
         chain_input = {
@@ -696,29 +698,31 @@ def chat():
         response = qa_chain(chain_input)
         chat_response = response['text']
 
-        # ---------------------------------------------------------------------------
+        # --------------------- Response Formatting ---------------------
+        # 1. Place headers (e.g. **Summary**) on new lines
+        formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response.strip())
 
-        # ------------------------- FORMATTING IMPROVEMENTS -------------------------
-        # 1. Add new lines around headers (wrapped with '**')
-        formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response)
-        # 2. Ensure proper spacing between paragraphs
-        formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response.strip())
-        # 3. Strip unnecessary leading/trailing quotes
+        # 2. Consolidate excess newlines to keep it clean
+        formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response)
+
+        # 3. Strip leading/trailing quotation marks if present
         if formatted_response.startswith('"') and formatted_response.endswith('"'):
             formatted_response = formatted_response[1:-1]
-        # 4. (Optional) Decode escaped characters if still visible (commented out by default)
-        # formatted_response = formatted_response.encode('utf-8').decode('unicode_escape')
+        # --------------------------------------------------------------
 
-        # ------------------------- UPDATE CHAT HISTORY -----------------------------
+        # Update chat history
         chat_history.append({"role": "user", "message": user_message})
         chat_history.append({"role": "assistant", "message": formatted_response})
 
-        # ------------------------- PRETTY-PRINT JSON RESPONSE ----------------------
+        # Return pretty-printed JSON for better terminal readability
         return Response(
-            json.dumps({
-                "response": formatted_response,
-                "chat_history": chat_history
-            }, indent=4),
+            json.dumps(
+                {
+                    "response": formatted_response,
+                    "chat_history": chat_history
+                },
+                indent=4  # Pretty-print with indentation
+            ),
             mimetype='application/json'
         )
 
@@ -728,6 +732,7 @@ def chat():
             "error": "Failed to process the chat request. Please try again later.",
             "details": str(e)
         }), 500
+
 
 # --------------------- THE UPDATED ENDPOINT FOR SIMPLE API CALLS ---------------------
 @app.route('/api/chat', methods=['POST'])
