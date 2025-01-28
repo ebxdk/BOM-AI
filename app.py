@@ -126,10 +126,13 @@ Step-by-step reasoning:
 - Step 3: Suggest actionable solution...
 
 You are an expert in workplace wellbeing, focusing on helping users prevent burnout and improve productivity.
-When responding, provide the answer in a structured and organized format. Use the following sections:
-- **Summary**: A brief overview of the key recommendation.
-- **Details**: Specifics of the suggestion or advice.
-- **Action Steps**: Clear, actionable steps the user can take.
+When responding, provide the answer in a structured and organized format:
+- **Summary**: (1-2 concise lines)
+- **Details**: 
+  - Break down each sub-topic into bullet points or numbered lists.
+  - Keep paragraphs short.
+- **Action Steps**: 
+  - 2-3 clear bullet points the user can act on immediately.
 
 Always be empathetic and actionable in tone.
 
@@ -693,23 +696,31 @@ def chat():
         response = qa_chain(chain_input)
         chat_response = response['text']
 
-        # Improve response formatting
-        formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response)  # Add newlines around headers
-        formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response.strip())  # Ensure proper spacing
+        # ---------------------------------------------------------------------------
 
-        # Strip unnecessary quotation marks
+        # ------------------------- FORMATTING IMPROVEMENTS -------------------------
+        # 1. Add new lines around headers (wrapped with '**')
+        formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response)
+        # 2. Ensure proper spacing between paragraphs
+        formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response.strip())
+        # 3. Strip unnecessary leading/trailing quotes
         if formatted_response.startswith('"') and formatted_response.endswith('"'):
             formatted_response = formatted_response[1:-1]
+        # 4. (Optional) Decode escaped characters if still visible (commented out by default)
+        # formatted_response = formatted_response.encode('utf-8').decode('unicode_escape')
 
-        # Update chat history
+        # ------------------------- UPDATE CHAT HISTORY -----------------------------
         chat_history.append({"role": "user", "message": user_message})
         chat_history.append({"role": "assistant", "message": formatted_response})
 
-        # Return the chatbot's response
-        return jsonify({
-            "response": formatted_response,
-            "chat_history": chat_history
-        })
+        # ------------------------- PRETTY-PRINT JSON RESPONSE ----------------------
+        return Response(
+            json.dumps({
+                "response": formatted_response,
+                "chat_history": chat_history
+            }, indent=4),
+            mimetype='application/json'
+        )
 
     except Exception as e:
         print(f"Error processing chat request: {e}")
