@@ -662,26 +662,21 @@ def chat():
     connection_score = request.json.get('connection_score', 0)
     recommendations = request.json.get('recommendations', "No recommendations available.")
 
-    # Validate input
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
     try:
         # --------------------- Advanced RAG: DO NOT CHANGE ---------------------
-        # Retrieve relevant documents
         retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
         retrieved_docs = retriever.get_relevant_documents(user_message)
         context = "\n\n".join([doc.page_content for doc in retrieved_docs])
 
-        # Self-query retrieval for deeper personalization
         self_query_docs = self_query_retriever.get_relevant_documents(user_message)
         self_query_context = "\n\n".join([doc.page_content for doc in self_query_docs])
 
-        # Combine retrieved contexts
         combined_context = f"{context}\n\n{self_query_context}"
         # ----------------------------------------------------------------------
 
-        # Prepare input for the LangChain chain
         chain_input = {
             'username': username,
             'energy_score': energy_score,
@@ -694,34 +689,27 @@ def chat():
             'question': user_message
         }
 
-        # Generate response using the QA chain
         response = qa_chain(chain_input)
         chat_response = response['text']
 
         # --------------------- Response Formatting ---------------------
-        # 1. Place headers (e.g. **Summary**) on new lines
         formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response.strip())
-
-        # 2. Consolidate excess newlines to keep it clean
         formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response)
-
-        # 3. Strip leading/trailing quotation marks if present
         if formatted_response.startswith('"') and formatted_response.endswith('"'):
             formatted_response = formatted_response[1:-1]
         # --------------------------------------------------------------
 
-        # Update chat history
         chat_history.append({"role": "user", "message": user_message})
         chat_history.append({"role": "assistant", "message": formatted_response})
 
-        # Return pretty-printed JSON for better terminal readability
         return Response(
             json.dumps(
                 {
                     "response": formatted_response,
                     "chat_history": chat_history
                 },
-                indent=4  # Pretty-print with indentation
+                ensure_ascii=False,  # <--- ADD THIS
+                indent=4
             ),
             mimetype='application/json'
         )
