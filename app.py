@@ -702,6 +702,7 @@ def chat():
         chat_history.append({"role": "user", "message": user_message})
         chat_history.append({"role": "assistant", "message": formatted_response})
 
+        # Use ensure_ascii=False here
         return Response(
             json.dumps(
                 {
@@ -716,10 +717,17 @@ def chat():
 
     except Exception as e:
         print(f"Error processing chat request: {e}")
-        return jsonify({
-            "error": "Failed to process the chat request. Please try again later.",
-            "details": str(e)
-        }), 500
+        # Also use ensure_ascii=False in the error response
+        return Response(
+            json.dumps(
+                {
+                    "error": "Failed to process the chat request. Please try again later.",
+                    "details": str(e)
+                },
+                ensure_ascii=False
+            ),
+            mimetype='application/json'
+        ), 500
 
 
 # --------------------- THE UPDATED ENDPOINT FOR SIMPLE API CALLS ---------------------
