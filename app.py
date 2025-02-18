@@ -153,8 +153,9 @@ def chat():
 
     try:
         # --------------------- Advanced RAG: DO NOT CHANGE ---------------------
+        # Update search_type from "hybrid" to "mmr" (or another valid type)
         retriever = vectorstore.as_retriever(
-            search_type="hybrid", search_kwargs={"k": 5, "alpha": 0.5}
+            search_type="mmr", search_kwargs={"k": 5}
         )
         retrieved_docs = retriever.get_relevant_documents(user_message)
         context = "\n\n".join([doc.page_content for doc in retrieved_docs])
