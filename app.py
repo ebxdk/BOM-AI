@@ -98,6 +98,7 @@ Conversation History:
 {chat_history}
 
 Now, based on these instructions and the conversation so far, craft your response.
+Side note: dont use any special formatting. 
 """
 
 prompt = PromptTemplate(
