@@ -177,8 +177,8 @@ def chat():
         if "**Action Steps**" in formatted_response:
             formatted_response = formatted_response.replace("**Action Steps**", "🚀 **Action Steps:**")
 
-        # Return the complete formatted response at once
-        return Response(formatted_response, mimetype="text/plain")
+        # Return the formatted text in JSON
+        return jsonify({"response": formatted_response})
 
     except Exception as e:
         print(f"Error processing chat request: {e}")
