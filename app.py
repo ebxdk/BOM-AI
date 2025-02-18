@@ -91,7 +91,7 @@ User Profile:
 - Recommended Tools: {recommendations}
 
 **Assistant Response:**
-1️⃣ **Summary:** {Insert engaging, short response}
+1️⃣ **Summary:** Insert engaging, short response
 2️⃣ **Key Insights:**
    - Key insight about the user's current state.
    - Explanation of why this is important.
@@ -153,7 +153,6 @@ def chat():
 
     try:
         # --------------------- Advanced RAG: DO NOT CHANGE ---------------------
-        # Update search_type from "hybrid" to "mmr" (or another valid type)
         retriever = vectorstore.as_retriever(
             search_type="mmr", search_kwargs={"k": 5}
         )
