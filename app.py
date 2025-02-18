@@ -115,47 +115,82 @@ memory = ConversationBufferMemory(memory_key='chat_history', return_messages=Tru
 prompt_template = """
 You are an expert in workplace wellbeing, focusing on helping users prevent burnout and improve productivity. When responding, use relevant data from the user’s assessment and the provided dataset. Maintain an empathetic tone and provide clear and actionable advice.
 
-You are a workplace well-being expert, helping users prevent burnout and improve productivity.
-Your response should be:
-- **Concise (2-3 sentences per section)**
-- **Actionable (Clear steps to take)**
-- **Engaging (Encourage user!)**
+Before giving a response, follow these steps:
+1. Identify the user’s question and understand its relevance to their Capacity Scores.
+2. Break down the question to address each score area (Energy, Purpose, Connection) only if relevant.
+3. Propose a solution or action for the user, highlighting how it can improve their scores.
 
-### **Response Format:**
-1️⃣ **Summary (1-2 lines)**
-2️⃣ **Key Insights (Bullet points)**
-3️⃣ **Action Plan (Clear steps)**
+Step-by-step reasoning:
+- Step 1: Identify question relevance...
+- Step 2: Breakdown by Capacity Score areas...
+- Step 3: Suggest actionable solution...
 
----
-User: "{question}"
+You are an expert in workplace wellbeing, focusing on helping users prevent burnout and improve productivity.
+When responding, provide the answer in a structured and organized format:
+- **Summary**: (1-2 concise lines)
+- **Details**: 
+  - Break down each sub-topic into bullet points or numbered lists.
+  - Keep paragraphs short.
+- **Action Steps**: 
+  - 2-3 clear bullet points the user can act on immediately.
 
-Context (Relevant information): {chat_history}
-User Profile:
-- Energy Score: {energy_score}/30
-- Purpose Score: {purpose_score}/30
-- Connection Score: {connection_score}/30
-- Current State: {user_state}
-- Recommended Tools: {recommendations}
+Always be empathetic and actionable in tone.
 
-**Assistant Response:**
-1️⃣ **Summary:** {Insert engaging, short response}
-2️⃣ **Key Insights:**
-   - Key insight about the user's current state.
-   - Explanation of why this is important.
-   - Evidence or data-backed insight.
+User: “How can I start using the recommended tools to improve my energy levels?”
 
-3️⃣ **Action Plan:**
-   - **Step 1:** Immediate action for today.
-   - **Step 2:** Next step to take.
-   - **Step 3:** How to track progress.
+Assistant:
+“Great question! Since your assessment shows you’re currently in the {user_state} state, the first tool I recommend is {recommendations}, which focuses on sustainable energy management. This tool encourages prioritizing your most demanding tasks during peak energy hours, like in the morning or after breaks.
 
-**Keep the tone friendly, supportive, and engaging.**
+Research from the dataset suggests that aligning tasks with your energy peaks can help improve focus and productivity without leading to burnout. Try this strategy for a week, and let’s revisit your progress. Feel free to ask me for adjustments or additional tips along the way!”
+
+User: “I’m having trouble staying focused. What can I do?”
+
+Assistant:
+“Absolutely, maintaining focus is a common challenge. Since you’re currently in the {user_state} state, I recommend the {recommendations}, specifically designed to improve focus through structured, purpose-driven tasks. Start with three 15-minute blocks daily where you focus on tasks aligned with your goals.
+
+This structured approach can reinforce your sense of purpose, which can enhance focus over time. Check in with yourself after each block to assess how it’s helping, and we can adjust as needed. Let me know if you’d like more tips on sustaining focus and aligning tasks with your goals!”
+
+User: “What’s the best way to feel more connected to my coworkers? I feel isolated sometimes.”
+
+Assistant:
+“Thanks for bringing this up. In your {user_state} state, building connections can make a big difference. I suggest starting with {recommendations}, which encourages weekly check-ins with a colleague or friend—whether for a coffee chat or a quick virtual meeting.
+
+The Capacity Creator dataset shows that meaningful, consistent social connections can gradually boost your sense of belonging and wellbeing. Try it out, and in a couple of weeks, we’ll see how it’s impacted your connection score. If it’s working well, we can add more layers to strengthen those connections!”
+
+User: “I want to improve all my scores. Where should I start?”
+
+Assistant:
+“That’s a fantastic goal! Based on your {user_state}, the best starting point is often your energy score, as it can influence both purpose and connection. I recommend using {recommendations}, which is focused on daily routines that help recharge your energy, such as a quick wind-down activity each evening—whether deep breathing, stretching, or journaling.
+
+This daily recharge habit can help you start each day with more energy, creating a positive ripple effect across all areas. Let’s give it a try for a couple of weeks and then assess if it’s helping you feel more balanced and productive.”
+
+User: “How do I know if the tools are really working for me?”
+
+Assistant:
+“Great question! In the {user_state} state, it’s important to track progress gradually. I’d suggest keeping a simple journal or using the Capacity Creator platform to log your feelings and energy levels daily.
+
+The {recommendations} that we’re focusing on should start showing results in about a week or two. We’ll reassess your scores during our next check-in, and I’ll be here to guide you if we need to adjust your tools or add new strategies. Let’s make sure every tool you use aligns with your goals!”
+
+User: “What if I don’t feel a difference with the tool?”
+
+Assistant:
+“That’s completely understandable; sometimes it takes a little while to see results. If you’re not feeling any difference with {recommendations} after a week or two, let’s switch gears. We can either adjust the tool slightly or introduce a complementary approach, tailored to your {user_state}.
+
+Feel free to keep me posted on how you’re feeling daily, and I’ll make sure to help you find the right adjustments so the tools are truly effective for your needs.”
+
+User {username} has completed an assessment with the following results:
+Energy Score: {energy_score}/30
+Purpose Score: {purpose_score}/30
+Connection Score: {connection_score}/30
+User State: {user_state}
+Recommendations: {recommendations}
 
 Use the following context to provide clear and actionable advice: dataset: {context}
 
 Conversation so far:
 {chat_history}
 
+User's question: {question}
 Assistant's answer:
 """
 
@@ -597,7 +632,6 @@ def set_username():
     session.modified = True
     return redirect(url_for('index'))
 
-
 def validate_username(username):
     """
     Validates the username to ensure it only contains alphanumeric characters
@@ -611,8 +645,6 @@ def generate_redis_key(username):
     This ensures keys are unique and secure.
     """
     return f"user_profile:{hashlib.sha256(username.encode()).hexdigest()}"
-
-
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -632,10 +664,8 @@ def chat():
 
     try:
         # --------------------- Advanced RAG: DO NOT CHANGE ---------------------
-        # Retrieve relevant documents (MMR + Similarity Hybrid Search for better context)
-        retriever = vectorstore.as_retriever(
-            search_type="hybrid", search_kwargs={"k": 5, "alpha": 0.5}  # Adjusted for better diversity & relevance
-        )
+        # Retrieve relevant documents
+        retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
         retrieved_docs = retriever.get_relevant_documents(user_message)
         context = "\n\n".join([doc.page_content for doc in retrieved_docs])
 
@@ -647,7 +677,7 @@ def chat():
         combined_context = f"{context}\n\n{self_query_context}"
         # ----------------------------------------------------------------------
 
-        # Prepare input for the LangChain chain with structured prompt formatting
+        # Prepare input for the LangChain chain
         chain_input = {
             'username': username,
             'energy_score': energy_score,
@@ -660,33 +690,37 @@ def chat():
             'question': user_message
         }
 
-        # --------------------- Structured Streaming Response ---------------------
-        def generate_response_stream():
-            """
-            Stream responses chunk-by-chunk for real-time feedback.
-            """
-            response = qa_chain(chain_input)
-            chat_response = response['text']
+        # Generate response using the QA chain
+        response = qa_chain(chain_input)
+        chat_response = response['text']
 
-            # **Enhanced Formatting**
-            formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response.strip())  # Keep Markdown headers readable
-            formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response)  # Remove extra blank lines
-            formatted_response = re.sub(r"^\s+|\s+$", "", formatted_response)  # Trim spaces
+        # --------------------- Response Formatting ---------------------
+        # 1. Place headers (e.g. **Summary**) on new lines
+        formatted_response = re.sub(r"(\*\*.*?\*\*)", r"\n\1\n", chat_response.strip())
 
-            # **Ensure responses are structured properly**
-            if "**Summary**" in formatted_response:
-                formatted_response = formatted_response.replace("**Summary**", "📌 **Summary:**")
-            if "**Key Insights**" in formatted_response:
-                formatted_response = formatted_response.replace("**Key Insights**", "🔍 **Key Insights:**")
-            if "**Action Steps**" in formatted_response:
-                formatted_response = formatted_response.replace("**Action Steps**", "🚀 **Action Steps:**")
+        # 2. Consolidate excess newlines to keep it clean
+        formatted_response = re.sub(r"\n{2,}", "\n\n", formatted_response)
 
-            # Stream the response **word-by-word** for a real-time effect
-            for word in formatted_response.split():
-                yield word + " "
+        # 3. Strip leading/trailing quotation marks if present
+        if formatted_response.startswith('"') and formatted_response.endswith('"'):
+            formatted_response = formatted_response[1:-1]
+        # --------------------------------------------------------------
 
-        # **Return streaming response**
-        return Response(generate_response_stream(), mimetype="text/plain")
+        # Update chat history
+        chat_history.append({"role": "user", "message": user_message})
+        chat_history.append({"role": "assistant", "message": formatted_response})
+
+        # Return pretty-printed JSON for better terminal readability
+        return Response(
+            json.dumps(
+                {
+                    "response": formatted_response,
+                    "chat_history": chat_history
+                },
+                indent=4  # Pretty-print with indentation
+            ),
+            mimetype='application/json'
+        )
 
     except Exception as e:
         print(f"Error processing chat request: {e}")
