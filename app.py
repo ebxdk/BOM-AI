@@ -1,4 +1,5 @@
 from flask import Flask, request, Response, jsonify
+from flask_cors import CORS
 import os
 import glob
 import re
@@ -20,7 +21,7 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 app = Flask(__name__)
-
+CORS(app)
 # --------------------- RAG Setup with LangChain ---------------------
 # Define the folder containing your text files (update this path if necessary)
 folder_path = '/home/ebad_khan5487/BOM-AI/Datasets'
