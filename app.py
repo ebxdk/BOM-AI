@@ -45,7 +45,26 @@ print(f"Loaded {len(all_docs)} documents from {folder_path}.")
 
 # Create embeddings and vectorstore
 embeddings = HuggingFaceEmbeddings(model_name='all-mpnet-base-v2')
-vectorstore = Chroma.from_documents(all_docs, embeddings, ids=doc_ids)
+
+
+chroma_path = "chroma_db"
+
+if os.path.exists(chroma_path):
+    print("Loading existing Chroma vectorstore...")
+    vectorstore = Chroma(
+        persist_directory=chroma_path,
+        embedding_function=embeddings
+    )
+else:
+    print("Building new Chroma vectorstore from documents...")
+    vectorstore = Chroma.from_documents(
+        all_docs,
+        embeddings,
+        ids=doc_ids,
+        persist_directory=chroma_path
+    )
+    vectorstore.persist()
+
 
 # Set up the LLM
 llm = ChatOpenAI(model_name='gpt-4', temperature=0.6)
