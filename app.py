@@ -47,7 +47,7 @@ print(f"Loaded {len(all_docs)} documents from {folder_path}.")
 embeddings = HuggingFaceEmbeddings(model_name='all-mpnet-base-v2')
 
 
-chroma_path = "chroma_db"
+chroma_path = "/home/ebad/BOM-AI/chroma_db"
 
 if os.path.exists(chroma_path):
     print("Loading existing Chroma vectorstore...")
