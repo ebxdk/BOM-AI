@@ -109,7 +109,7 @@ Context (from dataset):
 Conversation History:
 {chat_history}
 
-Now, write a concise, plain-text answer based on these instructions, with no special formatting.
+Now, write a concise, plain-text answer based on these instructions, with no special formatting. However, strucyure the response in comprehensive points.
 """
 
 prompt = PromptTemplate(
