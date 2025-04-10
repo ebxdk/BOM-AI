@@ -87,11 +87,11 @@ memory = ConversationBufferMemory(memory_key='chat_history', return_messages=Tru
 # Define the prompt template
 prompt_template = """
 You are a warm, supportive workplace well-being assistant from Capacity Creator. 
-Your goal is to help users improve their energy, purpose, and connection scores so they can thrive at work.
+Your goal is to help users improve their well-being so they can thrive at work.
 
 GUIDELINES:
 1. Respond in plain text only. Do not use Markdown or any special formatting (no **bold**, no ## headings, etc.).
-2. Acknowledge the user's current state (e.g., Maximized, Fatigued, etc.) and their scores.
+2. Acknowledge the user's current state.
 3. Refer to the recommended tool(s) from the dataset and how they can help the user improve or maintain their capacity.
 4. Encourage the user to use the Capacity Creator dashboard or website for a detailed walkthrough.
 5. Use a warm, conversational tone. If there is previous chat history, do not re-introduce yourself; simply continue the conversation.
@@ -100,9 +100,6 @@ GUIDELINES:
 User Query: "{question}"
 
 User Profile:
-- Energy Score: {energy_score}/30
-- Purpose Score: {purpose_score}/30
-- Connection Score: {connection_score}/30
 - Current State: {user_state}
 - Recommended Tools: {recommendations}
 
@@ -119,9 +116,6 @@ prompt = PromptTemplate(
     template=prompt_template,
     input_variables=[
         'username',
-        'energy_score',
-        'purpose_score',
-        'connection_score',
         'user_state',
         'recommendations',
         'context',
@@ -145,9 +139,6 @@ def chat():
     username = request.json.get('username', 'Anonymous')
     chat_history = request.json.get('chat_history', [])
     user_state = request.json.get('user_state', 'Unknown')
-    energy_score = request.json.get('energy_score', 0)
-    purpose_score = request.json.get('purpose_score', 0)
-    connection_score = request.json.get('connection_score', 0)
     recommendations = request.json.get('recommendations', "No recommendations available.")
 
     # Validate input
@@ -171,9 +162,6 @@ def chat():
         # Prepare input for the LangChain chain with structured prompt formatting
         chain_input = {
             'username': username,
-            'energy_score': energy_score,
-            'purpose_score': purpose_score,
-            'connection_score': connection_score,
             'user_state': user_state,
             'recommendations': recommendations,
             'context': combined_context,
