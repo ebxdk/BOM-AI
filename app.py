@@ -46,7 +46,6 @@ print(f"Loaded {len(all_docs)} documents from {folder_path}.")
 # Create embeddings and vectorstore
 embeddings = HuggingFaceEmbeddings(model_name='all-mpnet-base-v2')
 
-
 chroma_path = "/home/ebad/BOM-AI/chroma_db"
 
 if os.path.exists(chroma_path):
@@ -64,7 +63,6 @@ else:
         persist_directory=chroma_path
     )
     vectorstore.persist()
-
 
 # Set up the LLM
 llm = ChatOpenAI(model_name='gpt-4', temperature=0.6)
@@ -92,7 +90,7 @@ Your goal is to help users improve their well-being so they can thrive at work.
 GUIDELINES:
 1. Respond in plain text only. Do not use Markdown or any special formatting (no **bold**, no ## headings, etc.).
 2. Acknowledge the user's current state.
-3. Refer to the recommended tool(s) from the dataset and how they can help the user improve or maintain their capacity.
+3. Refer to the dataset for guidance.
 4. Encourage the user to use the Capacity Creator dashboard or website for a detailed walkthrough.
 5. Use a warm, conversational tone. If there is previous chat history, do not re-introduce yourself; simply continue the conversation.
 
@@ -101,7 +99,6 @@ User Query: "{question}"
 
 User Profile:
 - Current State: {user_state}
-- Recommended Tools: {recommendations}
 
 Context (from dataset):
 {context}
@@ -109,7 +106,7 @@ Context (from dataset):
 Conversation History:
 {chat_history}
 
-Now, write a concise, plain-text answer based on these instructions, with no special formatting. However, strucyure the response in comprehensive points.
+Now, write a concise, plain-text answer based on these instructions, with no special formatting.
 """
 
 prompt = PromptTemplate(
@@ -117,7 +114,6 @@ prompt = PromptTemplate(
     input_variables=[
         'username',
         'user_state',
-        'recommendations',
         'context',
         'chat_history',
         'question'
@@ -139,7 +135,6 @@ def chat():
     username = request.json.get('username', 'Anonymous')
     chat_history = request.json.get('chat_history', [])
     user_state = request.json.get('user_state', 'Unknown')
-    recommendations = request.json.get('recommendations', "No recommendations available.")
 
     # Validate input
     if not user_message:
@@ -163,7 +158,6 @@ def chat():
         chain_input = {
             'username': username,
             'user_state': user_state,
-            'recommendations': recommendations,
             'context': combined_context,
             'chat_history': chat_history,
             'question': user_message
